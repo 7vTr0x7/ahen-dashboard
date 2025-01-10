@@ -4,22 +4,19 @@ import { Link, Routes, Route, Navigate } from "react-router-dom";
 import routes from "routes.js";
 import FixedPlugin from "components/fixedPlugin/FixedPlugin";
 import SignIn from "views/auth/SignIn"; // Explicitly importing
+import { useContext } from "react";
+import { RoutesContext } from "components/RoutesProvider";
 
 export default function Auth() {
-  // Log routes to check if Sign In is included
-  console.log("Routes in AuthLayout:", routes);
+ const { filteredRoutes } = useContext(RoutesContext);
 
-  const getRoutes = (routes) => {
-    return routes.map((prop, key) => {
-      if (prop.layout === "/auth") {
-        return (
-          <Route path={`/${prop.path}`} element={prop.component} key={key} />
-        );
-      } else {
-        return null;
-      }
-    });
-  };
+ const getRoutes = () => {
+   return filteredRoutes
+     .filter((route) => route.layout === "/auth")
+     .map((prop, key) => (
+       <Route path={prop.path} element={prop.component} key={key} />
+     ));
+ };
 
   document.documentElement.dir = "ltr";
 

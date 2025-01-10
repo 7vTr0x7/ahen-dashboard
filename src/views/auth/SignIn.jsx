@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { Toaster } from "react-hot-toast";
+import { RoutesContext } from "components/RoutesProvider";
 
 export default function Auth() {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -10,6 +11,7 @@ export default function Auth() {
     password: "",
   });
   const navigate = useNavigate();
+  const { updateRoutes } = useContext(RoutesContext);
 
   const toggleAuthMode = () => setIsSignUp((prev) => !prev);
 
@@ -20,8 +22,8 @@ export default function Auth() {
 
   const handleSubmit = async () => {
     const url = isSignUp
-      ? "https://driving.shellcode.cloud/vendor/signup"
-      : "https://driving.shellcode.cloud/vendor/login";
+      ? "http://localhost:3000/vendor/signup"
+      : "http://localhost:3000/vendor/login";
 
     const payload = {
       email: formData.email,
@@ -59,6 +61,7 @@ export default function Auth() {
             data.vendorId || data.subadmin.vendor_id
           );
           localStorage.setItem("token", data.token);
+          updateRoutes();
           navigate("/"); // Make sure this is executing
         }
       }
@@ -67,7 +70,7 @@ export default function Auth() {
       toast.error("Something went wrong. Please try again.");
     }
   };
-  console.log("mom");
+
   return (
     <div className="mb-16 mt-16 flex h-full w-full items-center justify-center px-2 md:mx-0 md:px-0 lg:mb-10 lg:items-center lg:justify-start">
       <div className="mt-[10vh] w-full max-w-full flex-col items-center md:pl-4 lg:pl-0 xl:max-w-[420px]">

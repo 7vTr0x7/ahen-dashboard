@@ -67,13 +67,12 @@ const allRoutes = [
   },
 ];
 
-// Filter the routes based on the presence of vendorToken
+/// Filter the routes based on the presence of vendorId or subadmin
 const vendorId = localStorage.getItem("vendorId");
 const subadmin = localStorage.getItem("subadmin");
 
 let filteredRoutes = allRoutes;
 
-// Restrict access if subadmin exists
 if (subadmin) {
   try {
     const { page_access } = JSON.parse(subadmin);

@@ -511,10 +511,13 @@ function PageOne() {
     try {
       // Make the API call using fetch
       console.log(formData);
-      const response = await fetch("https://driving.shellcode.cloud/license/create", {
-        method: "POST",
-        body: formDataObj, // Send FormData as body (multipart/form-data)
-      });
+      const response = await fetch(
+        "https://driving.shellcode.cloud/license/create",
+        {
+          method: "POST",
+          body: formDataObj, // Send FormData as body (multipart/form-data)
+        }
+      );
 
       // Check if the response is successful
       if (response.ok) {
@@ -2656,7 +2659,7 @@ function PageOne() {
             <button
               onClick={handleNext}
               className="rounded bg-blue-600 px-6 py-2 text-white transition hover:bg-blue-700"
-              >
+            >
               Next
             </button>
           ) : (
@@ -2664,8 +2667,7 @@ function PageOne() {
               {isPayed && (
                 <button
                   onClick={handleSubmit}
-                  
-            className="rounded bg-blue-600 px-6 py-2 text-white transition hover:bg-blue-700"
+                  className="rounded bg-blue-600 px-6 py-2 text-white transition hover:bg-blue-700"
                 >
                   Submit
                 </button>
