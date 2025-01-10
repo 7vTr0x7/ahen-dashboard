@@ -22,8 +22,8 @@ export default function Auth() {
 
   const handleSubmit = async () => {
     const url = isSignUp
-      ? "http://localhost:3000/vendor/signup"
-      : "http://localhost:3000/vendor/login";
+      ? "https://driving.shellcode.cloud/vendor/signup"
+      : "https://driving.shellcode.cloud/vendor/login";
 
     const payload = {
       email: formData.email,

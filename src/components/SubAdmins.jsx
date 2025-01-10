@@ -21,7 +21,7 @@ const SubAdmins = () => {
     }
 
     try {
-      const response = await fetch(`http://localhost:3000/api/subadmin`, {
+      const response = await fetch(`https://driving.shellcode.cloud/api/subadmin`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -67,7 +67,7 @@ const SubAdmins = () => {
 
       try {
         const response = await fetch(
-          `http://localhost:3000/api/${vendorId}/subadmins`
+          `https://driving.shellcode.cloud/api/${vendorId}/subadmins`
         );
         if (!response.ok) {
           throw new Error("Error fetching sub-admins");
