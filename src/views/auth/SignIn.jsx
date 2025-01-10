@@ -47,24 +47,26 @@ export default function Auth() {
         return;
       }
 
-      if (isSignUp) {
-        toast.success("Signup successful! Please log in.");
-        toggleAuthMode();
-      } else {
-        if (data.vendorId || data.subadmin) {
-          toast.success("Login successful!");
-          if (data.subadmin) {
-            localStorage.setItem("subadmin", JSON.stringify(data.subadmin));
-          }
-          localStorage.setItem(
-            "vendorId",
-            data.vendorId || data.subadmin.vendor_id
-          );
-          localStorage.setItem("token", data.token);
-          updateRoutes();
-          navigate("/"); // Make sure this is executing
-        }
-      }
+     if (isSignUp) {
+       toast.success("Signup successful! Please log in.");
+       toggleAuthMode();
+     } else {
+       if (data.vendorId || data.subadmin) {
+         toast.success("Login successful!");
+         if (data.subadmin) {
+           localStorage.setItem("subadmin", JSON.stringify(data.subadmin));
+         }
+         localStorage.setItem(
+           "vendorId",
+           data.vendorId || data.subadmin.vendor_id
+         );
+         localStorage.setItem("token", data.token);
+         updateRoutes();
+         navigate("/")
+         window.location.reload(); // Ensure routes update immediately
+       }
+     }
+
     } catch (error) {
       console.error("Error:", error);
       toast.error("Something went wrong. Please try again.");
