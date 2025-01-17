@@ -1,17 +1,12 @@
 import React, { useState } from "react";
-import { FaIdCard, FaSignature, FaFileAlt } from "react-icons/fa";
+import { FaIdCard } from "react-icons/fa";
 import { toast } from "react-hot-toast"; // Importing react-hot-toast
 
 const PageOne = () => {
   const [step, setStep] = useState(1);
   const [vehicleType, setVehicleType] = useState("");
-  const [mobileNumber, setMobileNumber] = useState("");
-  const [qualification, setQualification] = useState("");
   const [uploads, setUploads] = useState({
-    aadhaarFront: null,
-    aadhaarBack: null,
-    signature: null,
-    llPhoto: null, // New state for Learning License photo
+    llPhoto: null, // State for Learning License photo
   });
   const [isPayed, setIsPayed] = useState(false);
 
@@ -24,27 +19,13 @@ const PageOne = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (
-      !vehicleType ||
-      !mobileNumber ||
-      !uploads.aadhaarFront ||
-      !uploads.aadhaarBack ||
-      !uploads.signature ||
-      !uploads.llPhoto
-    ) {
-      toast.error(
-        "Please fill in all required fields and upload necessary files."
-      );
+    if (!vehicleType || !uploads.llPhoto) {
+      toast.error("Please fill in all required fields and upload necessary files.");
       return;
     }
 
     const formDataObj = new FormData();
     formDataObj.append("vehicleType", vehicleType);
-    formDataObj.append("mobileNumber", mobileNumber);
-    formDataObj.append("qualification", qualification);
-    formDataObj.append("aadhaarFront", uploads.aadhaarFront);
-    formDataObj.append("aadhaarBack", uploads.aadhaarBack);
-    formDataObj.append("signature", uploads.signature);
     formDataObj.append("llPhoto", uploads.llPhoto); // Appending LL photo to FormData
 
     try {
@@ -114,11 +95,6 @@ const PageOne = () => {
             toast.success("Payment successful! 🎉");
             setIsPayed(true);
           },
-          prefill: {
-            name: "User Name", // Replace with actual user data
-            email: "user@example.com", // Replace with actual user data
-            contact: "1234567890", // Replace with actual user data
-          },
           theme: { color: "#3399cc" },
         };
 
@@ -138,7 +114,7 @@ const PageOne = () => {
     <>
       <div className="flex h-screen flex-col items-center justify-center bg-gray-100 p-4">
         {step === 1 && (
-          <div className="grid grid-cols-2 gap-4 md:grid-cols-2 md:justify-center  lg:grid-cols-2">
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-2 md:justify-center lg:grid-cols-2">
             {["2 Wheeler", "4 Wheeler", "T-Permit", "2 & 4 Wheeler"].map(
               (type) => (
                 <button
@@ -161,66 +137,12 @@ const PageOne = () => {
             className="mt-8 w-full max-w-lg space-y-6 rounded-lg bg-white p-6 shadow-lg"
             onSubmit={handleSubmit}
           >
-            <div>
-              <label
-                htmlFor="mobile"
-                className="mb-2 block text-lg font-medium text-gray-700"
-              >
-                Mobile Number (Aadhaar linked){" "}
-                <span className="text-red-500">*</span>
-              </label>
-              <input
-                id="mobile"
-                type="text"
-                className="w-full rounded-lg border border-gray-300 p-3 focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter mobile number"
-                value={mobileNumber}
-                onChange={(e) => setMobileNumber(e.target.value)}
-                required
-              />
-            </div>
-
-            <div>
-              <label
-                htmlFor="qualification"
-                className="mb-2 block text-lg font-medium text-gray-700"
-              >
-                Qualification
-              </label>
-              <select
-                id="qualification"
-                className="w-full rounded-lg border border-gray-300 p-3 focus:ring-2 focus:ring-blue-500"
-                value={qualification}
-                onChange={(e) => setQualification(e.target.value)}
-              >
-                <option value="">Select Qualification</option>
-                {["10th", "12th", "Graduate", "Post Graduate"].map((qual) => (
-                  <option key={qual} value={qual}>
-                    {qual}
-                  </option>
-                ))}
-              </select>
-            </div>
-
             <div className="space-y-4">
-              {[
-                {
-                  label: "Aadhaar Card Front",
-                  key: "aadhaarFront",
-                  icon: FaIdCard,
-                },
-                {
-                  label: "Aadhaar Card Back",
-                  key: "aadhaarBack",
-                  icon: FaFileAlt,
-                },
-                { label: "Signature", key: "signature", icon: FaSignature },
-                {
-                  label: "Learning License Photo (LL)",
-                  key: "llPhoto",
-                  icon: FaIdCard,
-                }, // New field for LL photo
-              ].map(({ label, key, icon: Icon }) => (
+              {[{
+                label: "Learning License Photo (LL)",
+                key: "llPhoto",
+                icon: FaIdCard,
+              }].map(({ label, key, icon: Icon }) => (
                 <div key={key} className="flex items-center space-x-4">
                   <Icon size={24} className="text-gray-500" />
                   <label htmlFor={key} className="flex-1 text-lg text-gray-700">
@@ -232,7 +154,7 @@ const PageOne = () => {
                     className="w-40 rounded-lg border border-gray-300 p-2 focus:ring-2 focus:ring-blue-500"
                     onChange={(e) => handleFileUpload(e, key)}
                     accept=".jpg,.png,.pdf"
-                    required={key !== "qualification"} // Make all fields required except qualification
+                    required
                   />
                 </div>
               ))}
