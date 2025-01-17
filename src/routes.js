@@ -10,8 +10,8 @@ import SignIn from "views/auth/SignIn";
 
 // Icon Imports
 import { MdBarChart, MdHome, MdLock, MdPerson } from "react-icons/md";
-import DrivingCustomers from "components/curtomers/DrivingCustomers";
-import LearningCustomers from "components/curtomers/LearningCutomers";
+import DrivingCustomers from "components/customers/DrivingCustomers";
+import LearningCustomers from "components/customers/LearningCutomers";
 import SubAdmins from "components/SubAdmins";
 
 // Initial routes array
@@ -30,13 +30,7 @@ const allRoutes = [
     icon: <MdPerson className="h-6 w-6" />,
     component: <DrivingCustomers />,
   },
-  {
-    name: "Learning Customers",
-    layout: "/admin",
-    path: "learning-customer",
-    icon: <MdPerson className="h-6 w-6" />,
-    component: <LearningCustomers />,
-  },
+
   {
     name: "Driving License",
     layout: "/admin",
