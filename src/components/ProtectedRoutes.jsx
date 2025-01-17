@@ -4,7 +4,7 @@ import { Outlet, Navigate } from "react-router-dom";
 const ProtectedRoutes = () => {
   const isAuthenticated = !!localStorage.getItem("vendorId"); // Example logic
 
-  return  <Outlet /> 
+  return isAuthenticated ? <Outlet /> : <Navigate to="/auth/sign-in" replace />;
 };
 
 export default ProtectedRoutes;
