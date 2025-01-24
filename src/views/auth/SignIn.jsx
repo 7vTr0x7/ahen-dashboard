@@ -9,6 +9,7 @@ export default function Auth() {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
+    phone: "",
   });
   const navigate = useNavigate();
   const { updateRoutes } = useContext(RoutesContext);
@@ -28,6 +29,7 @@ export default function Auth() {
     const payload = {
       email: formData.email,
       password: formData.password,
+      ...(isSignUp && { phone: formData.phone }), // Include phone only during signup
     };
 
     console.log("Payload:", payload); // Debugging log
@@ -38,6 +40,7 @@ export default function Auth() {
         headers: {
           "Content-Type": "application/json",
         },
+         credentials: "include", 
         body: JSON.stringify(payload),
       });
 
@@ -47,26 +50,26 @@ export default function Auth() {
         return;
       }
 
-     if (isSignUp) {
-       toast.success("Signup successful! Please log in.");
-       toggleAuthMode();
-     } else {
-       if (data.vendorId || data.subadmin) {
-         toast.success("Login successful!");
-         if (data.subadmin) {
-           localStorage.setItem("subadmin", JSON.stringify(data.subadmin));
-         }
-         localStorage.setItem(
-           "vendorId",
-           data.vendorId || data.subadmin.vendor_id
-         );
-         localStorage.setItem("token", data.token);
-         updateRoutes();
-         navigate("/")
-         window.location.reload(); // Ensure routes update immediately
-       }
-     }
-
+      if (isSignUp) {
+        toast.success("Signup successful! Please log in.");
+        localStorage.setItem("vendorformData", JSON.stringify(formData));
+        toggleAuthMode();
+      } else {
+        if (data.vendorId || data.subadmin) {
+          toast.success("Login successful!");
+          if (data.subadmin) {
+            localStorage.setItem("subadmin", JSON.stringify(data.subadmin));
+          }
+          localStorage.setItem(
+            "vendorId",
+            data.vendorId || data.subadmin.vendor_id
+          );
+          localStorage.setItem("token", data.token);
+          updateRoutes();
+          navigate("/");
+          window.location.reload(); // Ensure routes update immediately
+        }
+      }
     } catch (error) {
       console.error("Error:", error);
       toast.error("Something went wrong. Please try again.");
@@ -81,7 +84,7 @@ export default function Auth() {
         </h4>
         <p className="mb-9 ml-1 text-base text-gray-600">
           {isSignUp
-            ? "Create an account by entering your email and password!"
+            ? "Create an account by entering your email, phone number, and password!"
             : "Enter your email and password to sign in!"}
         </p>
 
@@ -102,6 +105,26 @@ export default function Auth() {
             className="mt-2 flex h-12 w-full items-center justify-center rounded-xl border border-gray-200 bg-white/0 p-3 text-sm outline-none dark:!border-white/10 dark:text-white"
           />
         </div>
+
+        {isSignUp && (
+          /* Phone Input */
+          <div className="mb-3">
+            <label
+              htmlFor="phone"
+              className="ml-1.5 text-sm font-medium text-navy-700 dark:text-white"
+            >
+              Phone*
+            </label>
+            <input
+              id="phone"
+              type="text"
+              value={formData.phone}
+              onChange={handleInputChange}
+              placeholder="Enter your phone number"
+              className="mt-2 flex h-12 w-full items-center justify-center rounded-xl border border-gray-200 bg-white/0 p-3 text-sm outline-none dark:!border-white/10 dark:text-white"
+            />
+          </div>
+        )}
 
         {/* Password Input */}
         <div className="mb-3">

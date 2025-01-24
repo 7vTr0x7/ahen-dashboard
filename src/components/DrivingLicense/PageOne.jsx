@@ -1,14 +1,75 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FaIdCard } from "react-icons/fa";
-import { toast } from "react-hot-toast"; // Importing react-hot-toast
+import { toast } from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
 const PageOne = () => {
   const [step, setStep] = useState(1);
   const [vehicleType, setVehicleType] = useState("");
   const [uploads, setUploads] = useState({
-    llPhoto: null, // State for Learning License photo
+    llPhoto: null,
   });
+  const [price, setPrice] = useState(0);
   const [isPayed, setIsPayed] = useState(false);
+  const [user, setUser] = useState(null);
+  const navigate = useNavigate();
+
+  // Fetch user profile on component load
+  useEffect(() => {
+    const storedUserId = localStorage.getItem("user_id");
+
+    if (storedUserId) {
+      const fetchProfile = async () => {
+        try {
+          const response = await fetch(
+            `https://driving.shellcode.cloud/api/users/users/${storedUserId}`
+          );
+          const data = await response.json();
+          if (data?.user) {
+            setUser(data.user);
+          } else {
+            toast.error("User data not found.");
+          }
+        } catch (error) {
+          console.error("Error fetching profile data:", error);
+          toast.error("Error fetching profile data.");
+        }
+      };
+
+      fetchProfile();
+    } else {
+      toast.error("User not logged in.");
+      navigate("/login");
+    }
+  }, [navigate]);
+
+  // Fetch price dynamically
+  useEffect(() => {
+    const fetchPrice = async () => {
+      try {
+        const response = await fetch(
+          "https://driving.shellcode.cloud/license/licenses/price"
+        );
+        const data = await response.json();
+        if (response.ok && data?.data) {
+          const drivingPrice = data.data.find(
+            (item) => item.price_type === "driving_license_customer_price"
+          );
+          if (drivingPrice) {
+            setPrice(parseFloat(drivingPrice.price));
+          } else {
+            toast.error("Price data not found.");
+          }
+        } else {
+          toast.error("Failed to fetch price data.");
+        }
+      } catch (error) {
+        toast.error("An error occurred while fetching price data.");
+      }
+    };
+
+    fetchPrice();
+  }, []);
 
   const handleFileUpload = (e, key) => {
     if (e.target.files && e.target.files[0]) {
@@ -19,18 +80,31 @@ const PageOne = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!vehicleType || !uploads.llPhoto) {
-      toast.error("Please fill in all required fields and upload necessary files.");
+    // Ensure user details are complete
+    if (!user?.phone_number) {
+      toast.error("Please update your profile with a valid phone number.");
       return;
     }
 
+    if (!vehicleType || !uploads.llPhoto) {
+      toast.error(
+        "Please select a vehicle type and upload the required Learning License photo."
+      );
+      return;
+    }
+
+    const storedUserId = localStorage.getItem("user_id");
+
     const formDataObj = new FormData();
-    formDataObj.append("vehicleType", vehicleType);
-    formDataObj.append("llPhoto", uploads.llPhoto); // Appending LL photo to FormData
+    formDataObj.append("license_type", "driving");
+    formDataObj.append("vehicle_type", vehicleType);
+    formDataObj.append("LL_photo", uploads.llPhoto); // Appending the file
+    formDataObj.append("payment_filed", price.toString());
+    formDataObj.append("user_id", storedUserId);
 
     try {
       const response = await fetch(
-        "https://driving.shellcode.cloud/license/create",
+        "https://driving.shellcode.cloud/license/driving/create",
         {
           method: "POST",
           body: formDataObj,
@@ -39,9 +113,11 @@ const PageOne = () => {
 
       if (response.ok) {
         const responseData = await response.json();
-        console.log("Submission successful:", responseData);
-        toast.success("Data added successfully!");
-        setIsPayed(true); // Display submit button after successful payment
+        console.log(responseData);
+        if (responseData.success) {
+          toast.success("Data added successfully!");
+          navigate("/"); // Navigate to home after success
+        }
       } else {
         toast.error("Submission failed. Please try again.");
       }
@@ -88,9 +164,14 @@ const PageOne = () => {
           key: "rzp_test_3sEAtEoClhTs62",
           amount: data.order.amount,
           currency: "INR",
-          name: "Ahen",
+          name: "Driving License",
           description,
           order_id: data.order.id,
+          prefill: {
+            name: user?.name || "",
+            email: user?.email || "",
+            contact: `+91${user?.phone_number}`,
+          },
           handler: async () => {
             toast.success("Payment successful! 🎉");
             setIsPayed(true);
@@ -132,58 +213,54 @@ const PageOne = () => {
           </div>
         )}
 
-        {step === 2 && !isPayed && (
+        {step === 2 && (
           <form
             className="mt-8 w-full max-w-lg space-y-6 rounded-lg bg-white p-6 shadow-lg"
             onSubmit={handleSubmit}
           >
             <div className="space-y-4">
-              {[{
-                label: "Learning License Photo (LL)",
-                key: "llPhoto",
-                icon: FaIdCard,
-              }].map(({ label, key, icon: Icon }) => (
-                <div key={key} className="flex items-center space-x-4">
-                  <Icon size={24} className="text-gray-500" />
-                  <label htmlFor={key} className="flex-1 text-lg text-gray-700">
-                    {label}
-                  </label>
-                  <input
-                    id={key}
-                    type="file"
-                    className="w-40 rounded-lg border border-gray-300 p-2 focus:ring-2 focus:ring-blue-500"
-                    onChange={(e) => handleFileUpload(e, key)}
-                    accept=".jpg,.png,.pdf"
-                    required
-                  />
-                </div>
-              ))}
+              <div className="flex items-center space-x-4">
+                <FaIdCard size={24} className="text-gray-500" />
+                <label
+                  htmlFor="llPhoto"
+                  className="flex-1 text-lg text-gray-700"
+                >
+                  Learning License Photo (LL)
+                </label>
+                <input
+                  id="llPhoto"
+                  type="file"
+                  className="w-40 rounded-lg border border-gray-300 p-2 focus:ring-2 focus:ring-blue-500"
+                  onChange={(e) => handleFileUpload(e, "llPhoto")}
+                  accept=".jpg,.png,.pdf"
+                  required
+                />
+              </div>
             </div>
 
             {/* Display the price */}
             <div className="mt-4 text-center text-lg font-semibold text-gray-800">
               <p>
-                Total Price: <span className="text-blue-500">₹1000</span>
+                Total Price: <span className="text-blue-500">₹{price}</span>
               </p>
             </div>
-
-            <button
-              type="submit"
-              className="w-full rounded-lg bg-blue-500 py-3 text-white transition duration-300 ease-in-out hover:bg-blue-600"
-              onClick={() => initializeRazorpay(1000, "Driving License")}
-            >
-              Proceed to Payment
-            </button>
+            {isPayed ? (
+              <button
+                onClick={handleSubmit}
+                className="w-full rounded-lg bg-green-500 py-3 text-white transition duration-300 ease-in-out hover:bg-green-600"
+              >
+                Submit
+              </button>
+            ) : (
+              <button
+                type="button"
+                className="w-full rounded-lg bg-blue-500 py-3 text-white transition duration-300 ease-in-out hover:bg-blue-600"
+                onClick={() => initializeRazorpay(price, "Learning License")}
+              >
+                Proceed to Payment
+              </button>
+            )}
           </form>
-        )}
-
-        {isPayed && (
-          <button
-            onClick={handleSubmit}
-            className="w-full rounded-lg bg-green-500 py-3 text-white transition duration-300 ease-in-out hover:bg-green-600"
-          >
-            Submit
-          </button>
         )}
       </div>
     </>
