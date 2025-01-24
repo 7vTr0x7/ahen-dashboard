@@ -14,32 +14,15 @@ const PageOne = () => {
   });
   const [price, setPrice] = useState(0);
   const [isPayed, setIsPayed] = useState(false);
-  const [user, setUser] = useState(null);
+  // const [user, setUser] = useState(null);
 
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const storedUserId = localStorage.getItem("user_id");
-
-    if (storedUserId) {
-      const fetchProfile = async () => {
-        try {
-          const response = await fetch(
-            `https://driving.shellcode.cloud/api/users/users/${storedUserId}`
-          );
-          const data = await response.json();
-          if (data?.user) {
-            setUser(data.user);
-          }
-        } catch (error) {
-          console.error("Error fetching profile data:", error);
-          toast.error("Error fetching profile data.");
-        }
-      };
-
-      fetchProfile();
-    }
-  }, []);
+  // useEffect(() => {
+  //   const vendor = JSON.parse(localStorage.getItem("vendorData"));
+  //   console.log(vendor);
+  //   setUser(vendor);
+  // }, []);
 
   useEffect(() => {
     const fetchPrice = async () => {
@@ -77,7 +60,7 @@ const PageOne = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const storedUserId = localStorage.getItem("user_id");
+    const storedUserId = localStorage.getItem("vendorId");
     if (!storedUserId) {
       toast.error("User ID not found. Please log in again.");
       return;
@@ -119,6 +102,8 @@ const PageOne = () => {
     formDataObj.append("payment_filed", price.toString());
     formDataObj.append("user_id", storedUserId);
 
+    console.log(formDataObj);
+
     try {
       const response = await fetch(
         "https://driving.shellcode.cloud/license/learning/create",
@@ -144,60 +129,60 @@ const PageOne = () => {
   };
 
   const initializeRazorpay = async (amount, description) => {
-    if (!user.phone_number) {
-      toast.error("Please update user profile");
-      return;
-    }
-
     const tokenData = localStorage.getItem("token");
-    const { value } = JSON.parse(tokenData);
-    const response = await fetch(
-      "https://driving.shellcode.cloud/api/payments/create-order",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${value}`,
-        },
-        body: JSON.stringify({
-          amount,
-          currency: "INR",
-          receipt: "receipt#1",
-        }),
-        credentials: "include",
+    console.log(tokenData);
+    try {
+      const response = await fetch(
+        "https://driving.shellcode.cloud/api/payments/create-order",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${tokenData}`,
+          },
+          body: JSON.stringify({
+            amount,
+            currency: "INR",
+            receipt: "receipt#1",
+          }),
+          credentials: "include",
+        }
+      );
+
+      const data = await response.json();
+      console.log(data);
+      if (!data.success) {
+        toast.error("Failed to create order. Please try again.");
+        return;
       }
-    );
 
-    const data = await response.json();
-    if (!data.success) {
-      toast.error("Failed to create order. Please try again.");
-      return;
+      const options = {
+        key: "rzp_test_3sEAtEoClhTs62",
+        amount: data.order.amount,
+        currency: "INR",
+        name: "Ahen",
+        description,
+        order_id: data.order.id,
+        handler: async () => {
+          toast.success("Payment successful!");
+          setIsPayed(true); // Update the button after payment success
+        },
+        prefill: {
+          name: "",
+          email: "",
+          contact: "",
+        },
+        theme: { color: "#3399cc" },
+      };
+
+      const razorpay = new window.Razorpay(options);
+      razorpay.on("payment.failed", () =>
+        toast.error("Payment failed. Please try again.")
+      );
+      razorpay.open();
+    } catch (error) {
+      toast.error("Invalid token format. Please log in again.");
     }
-
-    const options = {
-      key: "rzp_test_3sEAtEoClhTs62",
-      amount: data.order.amount,
-      currency: "INR",
-      name: "Ahen",
-      description,
-      order_id: data.order.id,
-      handler: async () => {
-        toast.success("Payment successful!");
-        setIsPayed(true); // Update the button after payment success
-      },
-      prefill: {
-        name: user.name,
-        email: user.email,
-        contact: `+91${user?.phone_number}`,
-      },
-      theme: { color: "#3399cc" },
-    };
-
-    const razorpay = new window.Razorpay(options);
-    razorpay.on("payment.failed", () =>
-      toast.error("Payment failed. Please try again.")
-    );
-    razorpay.open();
   };
 
   return (

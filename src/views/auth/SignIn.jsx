@@ -40,7 +40,7 @@ export default function Auth() {
         headers: {
           "Content-Type": "application/json",
         },
-         credentials: "include", 
+        credentials: "include",
         body: JSON.stringify(payload),
       });
 
@@ -52,7 +52,7 @@ export default function Auth() {
 
       if (isSignUp) {
         toast.success("Signup successful! Please log in.");
-        localStorage.setItem("vendorformData", JSON.stringify(formData));
+        localStorage.setItem("vendorData", JSON.stringify(formData));
         toggleAuthMode();
       } else {
         if (data.vendorId || data.subadmin) {

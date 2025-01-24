@@ -11,37 +11,7 @@ const PageOne = () => {
   });
   const [price, setPrice] = useState(0);
   const [isPayed, setIsPayed] = useState(false);
-  const [user, setUser] = useState(null);
   const navigate = useNavigate();
-
-  // Fetch user profile on component load
-  useEffect(() => {
-    const storedUserId = localStorage.getItem("user_id");
-
-    if (storedUserId) {
-      const fetchProfile = async () => {
-        try {
-          const response = await fetch(
-            `https://driving.shellcode.cloud/api/users/users/${storedUserId}`
-          );
-          const data = await response.json();
-          if (data?.user) {
-            setUser(data.user);
-          } else {
-            toast.error("User data not found.");
-          }
-        } catch (error) {
-          console.error("Error fetching profile data:", error);
-          toast.error("Error fetching profile data.");
-        }
-      };
-
-      fetchProfile();
-    } else {
-      toast.error("User not logged in.");
-      navigate("/login");
-    }
-  }, [navigate]);
 
   // Fetch price dynamically
   useEffect(() => {
@@ -80,12 +50,6 @@ const PageOne = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Ensure user details are complete
-    if (!user?.phone_number) {
-      toast.error("Please update your profile with a valid phone number.");
-      return;
-    }
-
     if (!vehicleType || !uploads.llPhoto) {
       toast.error(
         "Please select a vehicle type and upload the required Learning License photo."
@@ -93,7 +57,7 @@ const PageOne = () => {
       return;
     }
 
-    const storedUserId = localStorage.getItem("user_id");
+    const storedUserId = localStorage.getItem("vendorId");
 
     const formDataObj = new FormData();
     formDataObj.append("license_type", "driving");
@@ -136,14 +100,13 @@ const PageOne = () => {
 
       script.onload = async () => {
         const tokenData = localStorage.getItem("token");
-        const { value } = JSON.parse(tokenData);
         const response = await fetch(
           "https://driving.shellcode.cloud/api/payments/create-order",
           {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
-              Authorization: `Bearer ${value}`,
+              Authorization: `Bearer ${tokenData}`,
             },
             body: JSON.stringify({
               amount,
@@ -168,9 +131,9 @@ const PageOne = () => {
           description,
           order_id: data.order.id,
           prefill: {
-            name: user?.name || "",
-            email: user?.email || "",
-            contact: `+91${user?.phone_number}`,
+            name: "",
+            email: "",
+            contact: "",
           },
           handler: async () => {
             toast.success("Payment successful! 🎉");
