@@ -37,10 +37,13 @@ const DrivingCustomers = () => {
         );
         const data = await response.json();
 
-        if (
-          data.message === "Driving license customers retrieved successfully"
-        ) {
-          setCustomers(data.customers);
+        if (data.message === "Licenses retrieved successfully") {
+          // Combine learning_license and driving_license into one array
+          const combinedCustomers = [
+            ...data.learning_license,
+            ...data.driving_license,
+          ];
+          setCustomers(combinedCustomers);
         } else {
           setCustomers([]);
           setError("No data found for this Vendor ID");
