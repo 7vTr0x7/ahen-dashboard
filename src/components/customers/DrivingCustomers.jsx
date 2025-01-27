@@ -33,7 +33,7 @@ const DrivingCustomers = () => {
 
       try {
         const response = await fetch(
-          `https://driving.shellcode.cloud/api/licenses/${vendorId}`
+          `https://driving.shellcode.cloud/api/vendor/${vendorId}/license`
         );
         const data = await response.json();
 
