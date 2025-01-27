@@ -65,6 +65,7 @@ const PageOne = () => {
     formDataObj.append("LL_photo", uploads.llPhoto); // Appending the file
     formDataObj.append("payment_filed", price.toString());
     formDataObj.append("user_id", storedUserId);
+    formDataObj.append("vendor_id", storedUserId);
 
     try {
       const response = await fetch(
